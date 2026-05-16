@@ -1,0 +1,374 @@
+================================================================
+TREES + GRAPH PATTERNS — COMPLETE GUIDE
+================================================================
+
+================================================================
+TREES
+================================================================
+
+CORE SETUP — ALWAYS WRITE THIS FIRST
+-------------------------------------
+data class TreeNode(
+    val value: Int,
+    var left: TreeNode? = null,
+    var right: TreeNode? = null
+)
+
+THREE TRAVERSALS — KNOW COLD
+-----------------------------
+fun inorder(root: TreeNode?): List<Int> {   // Left Root Right
+    val result = mutableListOf<Int>()
+    fun dfs(node: TreeNode?) {
+        node ?: return
+        dfs(node.left)
+        result.add(node.value)
+        dfs(node.right)
+    }
+    dfs(root)
+    return result
+}
+
+fun preorder(root: TreeNode?): List<Int> {  // Root Left Right
+    val result = mutableListOf<Int>()
+    fun dfs(node: TreeNode?) {
+        node ?: return
+        result.add(node.value)
+        dfs(node.left)
+        dfs(node.right)
+    }
+    dfs(root)
+    return result
+}
+
+fun postorder(root: TreeNode?): List<Int> { // Left Right Root
+    val result = mutableListOf<Int>()
+    fun dfs(node: TreeNode?) {
+        node ?: return
+        dfs(node.left)
+        dfs(node.right)
+        result.add(node.value)
+    }
+    dfs(root)
+    return result
+}
+
+================================================================
+PROBLEM 1 — MAXIMUM DEPTH OF BINARY TREE
+================================================================
+
+Input:  [3,9,20,null,null,15,7]
+Output: 3
+
+--- OPTIMAL O(n) recursive ---
+
+fun maxDepth(root: TreeNode?): Int {
+    if (root == null) return 0
+    return 1 + maxOf(maxDepth(root.left), maxDepth(root.right))
+}
+
+Key insight:
+Depth of a node = 1 + max depth of its children.
+Base case: null node has depth 0.
+
+Complexity: Time O(n) | Space O(h) where h = tree height
+
+================================================================
+PROBLEM 2 — LEVEL ORDER TRAVERSAL (BFS)
+================================================================
+
+Return nodes level by level.
+
+Input:  [3,9,20,null,null,15,7]
+Output: [[3],[9,20],[15,7]]
+
+--- BRUTE FORCE ---
+DFS with depth tracking -> works but less intuitive.
+
+--- OPTIMAL O(n) BFS with ArrayDeque ---
+
+fun levelOrder(root: TreeNode?): List<List<Int>> {
+    val result = mutableListOf<List<Int>>()
+    if (root == null) return result
+
+    val queue = ArrayDeque<TreeNode>()
+    queue.add(root)
+
+    while (queue.isNotEmpty()) {
+        val level = mutableListOf<Int>()
+        val size = queue.size          // snapshot — key step
+
+        repeat(size) {
+            val node = queue.removeFirst()
+            level.add(node.value)
+            node.left?.let  { queue.add(it) }
+            node.right?.let { queue.add(it) }
+        }
+        result.add(level)
+    }
+    return result
+}
+
+Key insight:
+Snapshot queue.size before processing each level.
+This separates current level from next level nodes
+added during processing.
+
+Complexity: Time O(n) | Space O(n)
+
+================================================================
+PROBLEM 3 — BINARY TREE RIGHT SIDE VIEW
+================================================================
+
+Return the value of the rightmost node at each level.
+
+Input:  [1,2,3,null,5,null,4]
+Output: [1,3,4]
+
+--- OPTIMAL O(n) BFS ---
+
+fun rightSideView(root: TreeNode?): List<Int> {
+    val result = mutableListOf<Int>()
+    if (root == null) return result
+
+    val queue = ArrayDeque<TreeNode>()
+    queue.add(root)
+
+    while (queue.isNotEmpty()) {
+        val size = queue.size
+        repeat(size) { i ->
+            val node = queue.removeFirst()
+            if (i == size - 1) result.add(node.value) // last in level
+            node.left?.let  { queue.add(it) }
+            node.right?.let { queue.add(it) }
+        }
+    }
+    return result
+}
+
+Key insight:
+Same as level order BFS. Just capture the last node
+of each level — that is the rightmost visible node.
+
+Complexity: Time O(n) | Space O(n)
+
+================================================================
+PROBLEM 4 — LOWEST COMMON ANCESTOR OF BST
+================================================================
+
+Find LCA of two nodes p and q in a BST.
+
+Input:  root=[6,2,8,0,4,7,9], p=2, q=8
+Output: 6
+
+Input:  root=[6,2,8,0,4,7,9], p=2, q=4
+Output: 2
+
+--- OPTIMAL O(h) ---
+
+fun lowestCommonAncestor(
+    root: TreeNode?,
+    p: TreeNode,
+    q: TreeNode
+): TreeNode? {
+    if (root == null) return null
+
+    return when {
+        p.value < root.value && q.value < root.value ->
+            lowestCommonAncestor(root.left, p, q)   // both left
+        p.value > root.value && q.value > root.value ->
+            lowestCommonAncestor(root.right, p, q)  // both right
+        else -> root  // split point — this is the LCA
+    }
+}
+
+Key insight:
+In a BST, if both p and q are smaller than root,
+LCA is in left subtree. If both larger, right subtree.
+If they split — root is the LCA.
+
+Complexity: Time O(h) | Space O(h)
+
+================================================================
+GRAPH PATTERNS
+================================================================
+
+CORE SETUP
+----------
+Graphs are usually given as:
+- 2D grid (number of islands)
+- Adjacency list (Map<Int, List<Int>>)
+- Edge list
+
+Always track visited to avoid infinite loops.
+
+DFS TEMPLATE
+------------
+fun dfs(
+    grid: Array<CharArray>,
+    i: Int,
+    j: Int,
+    visited: Array<BooleanArray>
+) {
+    if (i < 0 || i >= grid.size ||
+        j < 0 || j >= grid[0].size ||
+        visited[i][j] || grid[i][j] == '0') return
+
+    visited[i][j] = true
+    dfs(grid, i + 1, j, visited)
+    dfs(grid, i - 1, j, visited)
+    dfs(grid, i, j + 1, visited)
+    dfs(grid, i, j - 1, visited)
+}
+
+BFS TEMPLATE
+------------
+fun bfs(start: Int, graph: Map<Int, List<Int>>) {
+    val visited = HashSet<Int>()
+    val queue = ArrayDeque<Int>()
+    queue.add(start)
+    visited.add(start)
+
+    while (queue.isNotEmpty()) {
+        val node = queue.removeFirst()
+        for (neighbor in graph[node] ?: emptyList()) {
+            if (neighbor !in visited) {
+                visited.add(neighbor)
+                queue.add(neighbor)
+            }
+        }
+    }
+}
+
+================================================================
+PROBLEM 5 — NUMBER OF ISLANDS
+================================================================
+
+Count number of islands in a 2D grid.
+'1' = land, '0' = water.
+
+Input:
+[
+  ['1','1','0','0','0'],
+  ['1','1','0','0','0'],
+  ['0','0','1','0','0'],
+  ['0','0','0','1','1']
+]
+Output: 3
+
+--- BRUTE FORCE ---
+No clean brute force — DFS/BFS is the standard approach.
+
+--- OPTIMAL O(m*n) DFS ---
+
+fun numIslands(grid: Array<CharArray>): Int {
+    var count = 0
+
+    fun dfs(i: Int, j: Int) {
+        if (i < 0 || i >= grid.size ||
+            j < 0 || j >= grid[0].size ||
+            grid[i][j] == '0') return
+
+        grid[i][j] = '0'  // mark visited by sinking the island
+        dfs(i + 1, j)
+        dfs(i - 1, j)
+        dfs(i, j + 1)
+        dfs(i, j - 1)
+    }
+
+    for (i in grid.indices) {
+        for (j in grid[0].indices) {
+            if (grid[i][j] == '1') {
+                count++
+                dfs(i, j)
+            }
+        }
+    }
+    return count
+}
+
+Key insight:
+Every time we find unvisited land '1', it's a new island.
+DFS sinks the entire connected island by marking '0'.
+Count how many times we trigger DFS from main loop.
+
+Complexity: Time O(m*n) | Space O(m*n) recursion stack
+
+================================================================
+PROBLEM 6 — CLONE GRAPH
+================================================================
+
+Clone a connected undirected graph.
+Each node has val and list of neighbors.
+
+--- OPTIMAL O(n) DFS + HashMap ---
+
+class Node(val value: Int, val neighbors: MutableList<Node> = mutableListOf())
+
+fun cloneGraph(node: Node?): Node? {
+    if (node == null) return null
+    val visited = HashMap<Node, Node>()
+
+    fun dfs(curr: Node): Node {
+        visited[curr]?.let { return it }
+        val clone = Node(curr.value)
+        visited[curr] = clone
+        for (neighbor in curr.neighbors) {
+            clone.neighbors.add(dfs(neighbor))
+        }
+        return clone
+    }
+    return dfs(node)
+}
+
+Key insight:
+HashMap maps original node to its clone.
+Check visited before cloning to avoid infinite loops
+in cyclic graphs.
+
+Complexity: Time O(n) | Space O(n)
+
+================================================================
+SUMMARY — DECISION TABLE
+================================================================
+
+Problem                    | Approach         | Key trick
+---------------------------|------------------|------------------
+Max depth                  | DFS recursive    | 1 + max(left,right)
+Level order                | BFS + ArrayDeque | snapshot queue.size
+Right side view            | BFS              | last node per level
+Lowest common ancestor     | BST property     | split point = LCA
+Number of islands          | DFS on grid      | sink visited land
+Clone graph                | DFS + HashMap    | map original->clone
+
+================================================================
+WHEN TO USE DFS vs BFS
+================================================================
+
+Use DFS when:
+- Exploring all paths
+- Tree depth problems
+- Connected components
+- Cycle detection
+
+Use BFS when:
+- Shortest path
+- Level by level processing
+- Nearest neighbor
+
+================================================================
+COMPLEXITY SUMMARY
+================================================================
+
+Problem                    | Time    | Space
+---------------------------|---------|----------
+Max Depth                  | O(n)    | O(h)
+Level Order Traversal      | O(n)    | O(n)
+Right Side View            | O(n)    | O(n)
+Lowest Common Ancestor     | O(h)    | O(h)
+Number of Islands          | O(m*n)  | O(m*n)
+Clone Graph                | O(n)    | O(n)
+
+h = tree height
+m = rows, n = cols
+
+================================================================

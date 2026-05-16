@@ -1,0 +1,12 @@
+SUMMARY — DECISION TABLE
+=========================
+
+Situation                | Move
+-------------------------|-------------------
+sum < target             | Move L right
+sum > target             | Move R left
+sum == target            | Found answer
+height[L] < height[R]   | Move L right
+height[L] >= height[R]  | Move R left
+fast == slow value       | Move fast only
+fast != slow value       | Move both

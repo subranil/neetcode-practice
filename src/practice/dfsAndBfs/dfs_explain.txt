@@ -1,0 +1,50 @@
+package practice
+
+/*
+        1
+       / \
+      2   3
+     / \
+    4   5
+
+    fun dfs(node:TreeNode?) {
+        if (node==null) return
+        println(node)
+        dfs(node.left)
+        dfs(node.right)
+    }
+
+    DFS on graph has cycles -- need a visited set
+    fun dfs(graph: Map<Int, List<Int>>, node: Int, visited: MutableSet<Int>){
+        if (!visited.add(node)) return // already visited
+        println(node)
+        for(neighbour in graph[node] ? emptyList()) {
+            dfs(graph, neighbour, visited)
+        }
+    }
+
+    Three DFS Traversal Orders (Trees)
+Preorder   -> Node, Left, Right  -> Use: Copy tree, serialize
+Inorder    -> Left, Node, Right  -> Use: BST sorted order
+Postorder  -> Left, Right, Node  -> Use: Delete tree, evaluate expression
+Key DFS Use Cases in Interviews
+Path existence A to B   -> Traverse + visited set
+Cycle detection         -> Track recursion stack (back edge)
+Connected components    -> DFS from each unvisited node
+Topological sort        -> Postorder DFS on DAG
+Island counting         -> DFS flood fill on grid
+Grid DFS - Very Common
+fun dfs(grid: Array<CharArray>, i: Int, j: Int) {
+if (i < 0 || i >= grid.size || j < 0 || j >= grid[0].size) return
+if (grid[i][j] != '1') return
+grid[i][j] = '0'  // mark visited by mutating
+dfs(grid, i + 1, j)
+dfs(grid, i - 1, j)
+dfs(grid, i, j + 1)
+dfs(grid, i, j - 1)
+}
+Complexity
+       Tree        Graph
+Time    -> O(N)     -> O(V + E)
+Space   -> O(H)     -> O(V) visited set
+ */
