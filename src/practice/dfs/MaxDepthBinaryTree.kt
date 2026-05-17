@@ -1,4 +1,4 @@
-package practice.dfsAndBfs
+package practice.dfs
 
 class TreeNode(var `val`: Int) {
     var left: TreeNode? = null

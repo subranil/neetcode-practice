@@ -1,4 +1,4 @@
-package practice.dfsAndBfs
+package practice.dfs
 
 class WordSearch {
     /*
